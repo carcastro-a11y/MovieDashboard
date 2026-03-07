@@ -108,7 +108,7 @@ export default function RailBuilder({ onSaveRail }: { onSaveRail: (r: Rail) => v
         <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
           <select value={selectedDim} onChange={(e) => setSelectedDim(e.target.value)} style={selStyle}>
             <option value="">+ Add dimension…</option>
-            {availDims.map((d) => <option key={d.id} value={d.id}>{d.short}</option>)}
+            {availDims.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}
           </select>
           <button onClick={addRule} disabled={!selectedDim} className="btn-amber"
             style={{ border: "none", borderRadius: 7, padding: "8px 16px", fontSize: 12, cursor: selectedDim ? "pointer" : "not-allowed", display: "flex", alignItems: "center", gap: 5 }}>
@@ -128,7 +128,7 @@ export default function RailBuilder({ onSaveRail }: { onSaveRail: (r: Rail) => v
               return (
                 <div key={rule.dim} className="rule-row" style={{ borderRadius: "0 8px 8px 0", padding: "14px 14px 12px" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, fontWeight: 700, color: "var(--amber)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{dim.short}</span>
+                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10.5, fontWeight: 700, color: "var(--amber)", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{dim.name}</span>
                     <div className="op-toggle">
                       {([">=", "<="] as const).map((op) => (
                         <button key={op} onClick={() => setOp(i, op)} className={`op-btn ${rule.op === op ? "active" : "inactive"}`} style={{ border: "none" }}>

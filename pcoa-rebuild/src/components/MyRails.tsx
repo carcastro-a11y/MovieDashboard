@@ -103,7 +103,12 @@ function RailCard({ rail, isExample, onView, onEdit, onDup, onDelete }: {
   const actBtn: React.CSSProperties = { flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 5, color: "var(--text-muted)", fontFamily: "'Syne',sans-serif", fontWeight: 600, fontSize: 10.5, padding: "5px 6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 };
   return (
     <div className={`rail-card ${isExample ? "example" : "user"}`} style={{ padding: 15, display: "flex", flexDirection: "column", gap: 8 }}>
-      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 12.5, color: "var(--text-primary)" }}>{rail.name}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+        {rail.tier && (
+          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 700, background: "var(--amber-dim)", color: "var(--amber)", padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{rail.tier}</span>
+        )}
+        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 12.5, color: "var(--text-primary)" }}>{rail.name}</div>
+      </div>
       {rail.desc && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{rail.desc}</div>}
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "var(--text-muted)" }}>{matchCount} movies match</div>
       <RuleChips rules={rail.rules} />
@@ -131,6 +136,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
   onAdd: (r: Rail) => void;
 }) {
   const [exampleSearch, setExampleSearch] = useState("");
+  const [tierFilter, setTierFilter] = useState<"" | "1D" | "2D" | "3D">("");
   const [examplesOpen, setExamplesOpen] = useState(true);
   const [viewerRail, setViewerRail] = useState<{ rail: Rail; isExample: boolean } | null>(null);
   const [editRail, setEditRail] = useState<Rail | null>(null);
@@ -153,9 +159,11 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
   const inpStyle: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "7px 11px", width: "100%", marginBottom: 8, outline: "none" };
   const selStyle: React.CSSProperties = { flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 7, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "8px 12px", cursor: "pointer", outline: "none" };
 
-  const filteredExamples = EXAMPLE_RAILS.filter(
-    (r) => !exampleSearch || (r.name + r.desc).toLowerCase().includes(exampleSearch.toLowerCase())
-  );
+  const filteredExamples = EXAMPLE_RAILS.filter((r) => {
+    if (tierFilter && r.tier !== tierFilter) return false;
+    if (exampleSearch && !(r.name + r.desc).toLowerCase().includes(exampleSearch.toLowerCase())) return false;
+    return true;
+  });
 
   return (
     <div>
@@ -203,8 +211,15 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
               <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input value={exampleSearch} onChange={(e) => setExampleSearch(e.target.value)} placeholder="Filter rails…"
-              className="search-input" style={{ padding: "7px 11px 7px 28px", fontSize: 12.5, width: 200 }} />
+              className="search-input" style={{ padding: "7px 11px 7px 28px", fontSize: 12.5, width: 160 }} />
           </div>
+          <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value as any)}
+            style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 12, padding: "7px 10px", cursor: "pointer", outline: "none" }}>
+            <option value="">All tiers</option>
+            <option value="1D">1D — Single Dim</option>
+            <option value="2D">2D — Double Dim</option>
+            <option value="3D">3D — Triple Dim</option>
+          </select>
         </div>
 
         {examplesOpen && (
@@ -261,7 +276,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
               <select value={editDimSel} onChange={(e) => setEditDimSel(e.target.value)} style={selStyle}>
                 <option value="">+ Add dimension…</option>
                 {DIMS.filter((d) => !editRules.some((r) => r.dim === d.id)).map((d) => (
-                  <option key={d.id} value={d.id}>{d.short}</option>
+                  <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>
               <button onClick={() => { if (!editDimSel) return; setEditRules((p) => [...p, { dim: editDimSel, op: ">=", th: 0.3 }]); setEditDimSel(""); }} disabled={!editDimSel}
