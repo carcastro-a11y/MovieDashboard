@@ -9,9 +9,24 @@ export interface PreviewResult {
 
 export function runPreview(
   rules: Rule[],
+  movieIds?: string[],
   sortDim?: string,
   sortDir: "asc" | "desc" = "desc"
 ): PreviewResult {
+  // If explicit movieIds provided (example rails), filter by those IDs
+  if (movieIds && movieIds.length > 0) {
+    const idSet = new Set(movieIds);
+    const matched = MOVIES.filter((m) => idSet.has(m.id));
+    const sd = sortDim || rules?.[0]?.dim;
+    if (sd) {
+      matched.sort((a, b) =>
+        sortDir === "desc" ? b.scores[sd] - a.scores[sd] : a.scores[sd] - b.scores[sd]
+      );
+    }
+    return { count: matched.length, excluded: MOVIES.length - matched.length, movies: matched.slice(0, 20) };
+  }
+
+  // Otherwise use threshold rules
   if (!rules || rules.length === 0) return { count: 0, excluded: 0, movies: [] };
 
   let excluded = 0;
@@ -32,6 +47,7 @@ export function runPreview(
   return { count: matched.length, excluded, movies: matched.slice(0, 20) };
 }
 
-export function countMatches(rules: Rule[]): number {
+export function countMatches(rules: Rule[], movieIds?: string[]): number {
+  if (movieIds && movieIds.length > 0) return movieIds.length;
   return runPreview(rules).count;
 }

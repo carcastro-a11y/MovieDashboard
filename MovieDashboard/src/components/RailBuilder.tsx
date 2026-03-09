@@ -93,7 +93,7 @@ export default function RailBuilder({ onSaveRail }: { onSaveRail: (r: Rail) => v
     setSaveOk(true); setTimeout(() => setSaveOk(false), 2200);
   };
 
-  const { count, excluded, movies } = runPreview(rules, sortDim, sortDir);
+  const { count, excluded, movies } = runPreview(rules, undefined, sortDim, sortDir);
 
   const inpStyle: React.CSSProperties = { background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "7px 11px", width: "100%", marginBottom: 8, outline: "none" };
   const selStyle: React.CSSProperties = { flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 7, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "8px 12px", cursor: "pointer", outline: "none" };
@@ -218,7 +218,7 @@ export default function RailBuilder({ onSaveRail }: { onSaveRail: (r: Rail) => v
                   {movies.map((m) => (
                     <tr key={m.id}>
                       <td style={{ color: "var(--text-primary)", whiteSpace: "nowrap" }}>{m.title}</td>
-                      <td style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--text-muted)" }}>{m.year}</td>
+                      <td style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--text-muted)" }}></td>
                       {rules.map((r) => <ScoreCell key={r.dim} score={m.scores[r.dim]} />)}
                     </tr>
                   ))}

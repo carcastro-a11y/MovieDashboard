@@ -56,8 +56,8 @@ function RuleChips({ rules }: { rules: Rule[] }) {
 }
 
 // ── Movie table (for viewer modal) ───────────────────────────────────────────
-function ViewerMovieTable({ rules }: { rules: Rule[] }) {
-  const { count, movies } = runPreview(rules);
+function ViewerMovieTable({ rules, movieIds }: { rules: Rule[]; movieIds?: string[] }) {
+  const { count, movies } = runPreview(rules, movieIds);
   if (count === 0) return <div style={{ padding: 24, textAlign: "center", color: "var(--text-muted)", fontSize: 12 }}>No movies match these rules</div>;
   return (
     <div>
@@ -78,7 +78,7 @@ function ViewerMovieTable({ rules }: { rules: Rule[] }) {
                 <tr key={m.id}>
                   <td style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--text-muted)" }}>{idx + 1}</td>
                   <td style={{ color: "var(--text-primary)", whiteSpace: "nowrap" }}>{m.title}</td>
-                  <td style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--text-muted)" }}>{m.year}</td>
+                  <td style={{ fontFamily: "'JetBrains Mono',monospace", color: "var(--text-muted)" }}></td>
                   {rules.map((r) => {
                     const score = m.scores[r.dim];
                     const color = score > 0.2 ? "var(--orange)" : score < -0.2 ? "var(--blue)" : "var(--text-muted)";
@@ -99,16 +99,11 @@ function RailCard({ rail, isExample, onView, onEdit, onDup, onDelete }: {
   rail: Rail; isExample: boolean;
   onView: () => void; onEdit?: () => void; onDup: () => void; onDelete?: () => void;
 }) {
-  const matchCount = countMatches(rail.rules);
+  const matchCount = countMatches(rail.rules, rail.movieIds);
   const actBtn: React.CSSProperties = { flex: 1, background: "none", border: "1px solid var(--border)", borderRadius: 5, color: "var(--text-muted)", fontFamily: "'Syne',sans-serif", fontWeight: 600, fontSize: 10.5, padding: "5px 6px", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 3 };
   return (
     <div className={`rail-card ${isExample ? "example" : "user"}`} style={{ padding: 15, display: "flex", flexDirection: "column", gap: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-        {rail.tier && (
-          <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 9, fontWeight: 700, background: "var(--amber-dim)", color: "var(--amber)", padding: "2px 6px", borderRadius: 4, flexShrink: 0 }}>{rail.tier}</span>
-        )}
-        <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 12.5, color: "var(--text-primary)" }}>{rail.name}</div>
-      </div>
+      <div style={{ fontFamily: "'Syne',sans-serif", fontWeight: 700, fontSize: 12.5, color: "var(--text-primary)" }}>{rail.name}</div>
       {rail.desc && <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{rail.desc}</div>}
       <div style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 10, color: "var(--text-muted)" }}>{matchCount} movies match</div>
       <RuleChips rules={rail.rules} />
@@ -136,8 +131,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
   onAdd: (r: Rail) => void;
 }) {
   const [exampleSearch, setExampleSearch] = useState("");
-  const [tierFilter, setTierFilter] = useState<"" | "1D" | "2D" | "3D">("");
-  const [examplesOpen, setExamplesOpen] = useState(true);
+    const [examplesOpen, setExamplesOpen] = useState(true);
   const [viewerRail, setViewerRail] = useState<{ rail: Rail; isExample: boolean } | null>(null);
   const [editRail, setEditRail] = useState<Rail | null>(null);
   const [editName, setEditName] = useState("");
@@ -160,8 +154,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
   const selStyle: React.CSSProperties = { flex: 1, background: "var(--card)", border: "1px solid var(--border)", borderRadius: 7, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 13, padding: "8px 12px", cursor: "pointer", outline: "none" };
 
   const filteredExamples = EXAMPLE_RAILS.filter((r) => {
-    if (tierFilter && r.tier !== tierFilter) return false;
-    if (exampleSearch && !(r.name + r.desc).toLowerCase().includes(exampleSearch.toLowerCase())) return false;
+        if (exampleSearch && !(r.name + r.desc).toLowerCase().includes(exampleSearch.toLowerCase())) return false;
     return true;
   });
 
@@ -213,13 +206,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
             <input value={exampleSearch} onChange={(e) => setExampleSearch(e.target.value)} placeholder="Filter rails…"
               className="search-input" style={{ padding: "7px 11px 7px 28px", fontSize: 12.5, width: 160 }} />
           </div>
-          <select value={tierFilter} onChange={(e) => setTierFilter(e.target.value as any)}
-            style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-primary)", fontFamily: "'DM Sans',sans-serif", fontSize: 12, padding: "7px 10px", cursor: "pointer", outline: "none" }}>
-            <option value="">All tiers</option>
-            <option value="1D">1D — Single Dim</option>
-            <option value="2D">2D — Double Dim</option>
-            <option value="3D">3D — Triple Dim</option>
-          </select>
+          
         </div>
 
         {examplesOpen && (
@@ -260,7 +247,7 @@ export default function MyRails({ userRails, onUpdate, onDelete, onAdd }: {
                 );
               })}
             </div>
-            <ViewerMovieTable rules={viewerRail.rail.rules} />
+            <ViewerMovieTable rules={viewerRail.rail.rules} movieIds={viewerRail.rail.movieIds} />
           </>
         )}
       </Modal>
